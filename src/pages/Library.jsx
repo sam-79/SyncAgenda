@@ -25,7 +25,7 @@ export default function Library() {
   const [selectedMeetingId, setSelectedMeetingId] = useState(null);
   const formattedDate = selectedDate.format('YYYY-MM-DD');
 
-  const [openDialog, setOpenDialog] = useState(false);// meeting dialog
+  // const [openDialog, setOpenDialog] = useState(false);// meeting dialog
 
 
   // Inside the component (before return)
@@ -48,7 +48,7 @@ export default function Library() {
     }
   }, [isLoading, isError, meetings]);
 
-  const { data: meetingDetails , isLoading:meetingDetailsLoading} = useGetMeetingDetailsQuery(selectedMeetingId, {
+  const { data: meetingDetails, isLoading: meetingDetailsLoading } = useGetMeetingDetailsQuery(selectedMeetingId, {
     skip: !selectedMeetingId,
   });
 
@@ -140,6 +140,18 @@ export default function Library() {
                         <DeleteIcon />
                       </IconButton>
                     }
+                    sx={{
+                      mb: 1,
+                      borderRadius: 2,
+                      border: '2px solid',
+                      borderColor: selectedMeetingId === meeting.id ? 'primary.main' : 'background.paper',
+                      // backgroundColor: selectedMeetingId === meeting.id ? 'primary.light' : 'transparent',
+                      // color: selectedMeetingId === meeting.id ? 'primary.contrastText' : 'inherit',
+                      transition: 'all 0.2s ease-in-out',
+                      // '&:hover': {
+                      //   backgroundColor: selectedMeetingId === meeting.id ? 'primary.light' : 'action.hover'
+                      // }
+                    }}
                   >
                     <ListItemText primary={meeting.meeting_name} secondary={new Date(meeting.meeting_date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })} />
 
@@ -157,7 +169,7 @@ export default function Library() {
 
           {!selectedMeetingId ? (
             <MeetingPlaceholder />
-          ) : meetingDetails && !meetingDetailsLoading ? (
+          ) : meetingDetails  ? (
 
             <Box flexGrow={1} display="flex"
               flexDirection={isSmallScreen ? 'column' : 'row'}
