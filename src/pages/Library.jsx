@@ -17,7 +17,7 @@ import { useMediaQuery, useTheme } from '@mui/material';
 
 import IconButton from '@mui/material/IconButton';
 import 'dayjs/locale/en-gb';
-import MeetingTools from '../component/MeetingTools';
+import MeetingChatBot from '../component/MeetingChatBot';
 import MeetingPlaceholder from '../component/MeetingPlaceholder';
 
 export default function Library() {
@@ -177,7 +177,7 @@ export default function Library() {
               <Box width={isSmallScreen ? '100%' : '70%'}>
                 <MeetingDetails meetingDetails={meetingDetails} setSelectedMeetingId={setSelectedMeetingId} onDeleteMeeting={handleMeetingDelete} />
               </Box>
-              <MeetingTools />
+              <MeetingChatBot meetingID={selectedMeetingId} />
             </Box>
           ) : (
             // <Typography>Loading meeting details...</Typography>

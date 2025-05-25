@@ -1,4 +1,4 @@
-// component/MeetingTools.jsx
+// component/MeetingChatBot.jsx
 
 import {
   Box,
@@ -8,42 +8,67 @@ import {
   TextField,
   Button,
   CircularProgress,
+  Alert
 } from '@mui/material';
 import { useState, useRef, useEffect } from 'react';
-import { useAskMeetingQuestionMutation } from '../api/meetingAssitant';
+import {
+  useAskMeetingQuestionMutation,
+  useGetChatMeetingHistoryQuery
+} from '../api/meetingAssitant';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-export default function MeetingTools() {
-  const [messages, setMessages] = useState([
-    {
-      sender: 'bot',
-      text: '👋 Hi! I’m your meeting assistant. Ask me anything about your meetings.',
-    },
-  ]);
+export default function MeetingChatBot({ meetingID }) {
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [meetingId] = useState('3'); // static, or replace with props/context
   const messagesEndRef = useRef(null);
 
   const [askQuestion, { isLoading }] = useAskMeetingQuestionMutation();
+
+  const {
+    data: history,
+    isLoading: isChatHistoryLoading,
+    isError,
+    error,
+    refetch
+  } = useGetChatMeetingHistoryQuery (meetingID, {
+    skip: !meetingID, // skip if no ID
+  });
+
+  // Load chat history when meetingID changes
+  useEffect(() => {
+    if (history?.length) {
+      const formattedHistory = history.map((entry) => [entry]).flat();
+
+      setMessages(formattedHistory);
+    } else if (!isChatHistoryLoading && !isError) {
+      setMessages([
+        {
+          sender_type: 'bot',
+          message: '👋 Hi! I’m your meeting assistant. Ask me anything about your meetings.'
+        }
+      ]);
+    }
+  }, [meetingID, history]);
 
   const handleSend = async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
 
-    const userMessage = { sender: 'user', text: trimmed };
+    const userMessage = { sender_type: 'user', message: trimmed, timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
 
     try {
-      const res = await askQuestion({ meeting_id: meetingId, question: trimmed }).unwrap();
-      const botMessage = { sender: 'bot', text: res.answer };
+      const res = await askQuestion({ meeting_id: `${meetingID}`, question: trimmed }).unwrap();
+      const botMessage = { sender_type: 'bot', message: res.answer };
       setMessages((prev) => [...prev, botMessage]);
+      refetch(); // optional:  refresh history after new message
     } catch (err) {
       console.error(err);
       setMessages((prev) => [
         ...prev,
-        { sender: 'bot', text: '❌ Sorry, something went wrong. Please try again.' },
+        { sender_type: 'bot', message: '❌ Sorry, something went wrong. Please try again.' }
       ]);
     }
   };
@@ -66,7 +91,7 @@ export default function MeetingTools() {
         padding: 2,
         height: '75vh',
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'column'
       }}
     >
       <Typography variant="h6" gutterBottom>
@@ -74,6 +99,18 @@ export default function MeetingTools() {
       </Typography>
 
       <Divider sx={{ mb: 2 }} />
+
+      {
+        isChatHistoryLoading && <CircularProgress />
+      }
+
+      {
+        isError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {`${error.status}: ${error.data.detail}` }
+          </Alert>
+        )
+      }
 
       {/* Chat Area */}
       <Box
@@ -83,14 +120,17 @@ export default function MeetingTools() {
         sx={{
           scrollbarWidth: 'thin',
           '&::-webkit-scrollbar': { width: '6px' },
-          '&::-webkit-scrollbar-thumb': { backgroundColor: 'red', borderRadius: '4px' },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'red',
+            borderRadius: '4px'
+          }
         }}
       >
         {messages.map((msg, idx) => (
           <Box
             key={idx}
             display="flex"
-            justifyContent={msg.sender === 'user' ? 'flex-end' : 'flex-start'}
+            justifyContent={msg.sender_type === 'user' ? 'flex-end' : 'flex-start'}
             mb={1.5}
           >
             <Box
@@ -98,13 +138,13 @@ export default function MeetingTools() {
               py={1.5}
               maxWidth="75%"
               borderRadius={2}
-              bgcolor={msg.sender === 'user' ? 'primary.main' : 'background.default'}
-              color={msg.sender === 'user' ? 'primary.contrastText' : 'text.primary'}
+              bgcolor={msg.sender_type === 'user' ? 'primary.main' : 'background.default'}
+              color={msg.sender_type === 'user' ? 'primary.contrastText' : 'text.primary'}
               boxShadow={1}
               fontSize="0.95rem"
             >
               <ReactMarkdown
-                children={msg.text}
+                children={msg.message}
                 remarkPlugins={[remarkGfm]}
                 components={{
                   p: ({ children }) => <Typography component="span">{children}</Typography>,
@@ -117,7 +157,7 @@ export default function MeetingTools() {
                           px: 0.6,
                           borderRadius: 1,
                           fontSize: '0.85em',
-                          fontFamily: 'monospace',
+                          fontFamily: 'monospace'
                         }}
                       >
                         {children}
@@ -131,7 +171,7 @@ export default function MeetingTools() {
                           p: 2,
                           borderRadius: 2,
                           fontSize: '0.85em',
-                          overflowX: 'auto',
+                          overflowX: 'auto'
                         }}
                       >
                         <code>{children}</code>
@@ -143,9 +183,17 @@ export default function MeetingTools() {
                         {children}
                       </Typography>
                     </li>
-                  ),
+                  )
                 }}
               />
+              <Typography
+                variant="caption"
+                sx={{ display: 'block', textAlign: 'right', mt: 0.5, opacity: 0.7, fontSize: '0.7rem' }}
+              >
+                {msg.timestamp
+                  ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                  : ''}
+              </Typography>
             </Box>
           </Box>
         ))}
