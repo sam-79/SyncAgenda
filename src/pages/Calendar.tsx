@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -14,10 +14,11 @@ import {
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { useGetMeetingsByDateQuery } from '../api/calendar';
+import { useGetMeetingsByDateQuery, useDeleteMeetingMutation } from '../api/calendar';
 import CreateMeetingDialog from '../component/CreateMeetingDialog';
 import { useSelector } from 'react-redux';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EventDetails from '../component/EventDetails';
 
 const localizer = momentLocalizer(moment);
 
@@ -30,12 +31,15 @@ export default function Calendar() {
 
   const { userData } = useSelector((state) => state.auth);
 
+  const onView = useCallback((newView) => setView(newView), [setView])
+
   const {
     data: meetings = [],
     isLoading,
     isError,
     refetch
   } = useGetMeetingsByDateQuery(moment().format('YYYY-MM-DD'));
+  
 
   useEffect(() => {
     if (meetings?.length > 0) {
@@ -45,12 +49,15 @@ export default function Calendar() {
         start: new Date(meeting.meeting_date),
         end: moment(meeting.meeting_date).add(1, 'hour').toDate(),
         allDay: false,
-        description: meeting.meeting_description,
-        participants: meeting.participants
+        meeting_data: meeting
+
       }));
       setEvents(mapped);
     }
   }, [meetings]);
+
+
+
 
   const handleDelete = () => {
     // Placeholder: Add actual delete logic here
@@ -84,7 +91,7 @@ export default function Calendar() {
             views={['month', 'week', 'day']}
             defaultView={view}
             view={view}
-            onView={(newView) => setView(newView)}
+            onView={onView}
             date={currentDate}
             onNavigate={(date) => setCurrentDate(date)}
             onSelectEvent={(event) => setSelectedEvent(event)}
@@ -104,7 +111,7 @@ export default function Calendar() {
       </Dialog>
 
       {/* Event Detail Dialog */}
-      <Dialog open={!!selectedEvent} onClose={() => setSelectedEvent(null)} maxWidth="sm" fullWidth>
+      {/* <Dialog open={!!selectedEvent} onClose={() => setSelectedEvent(null)} maxWidth="sm" fullWidth>
         {selectedEvent && (
           <>
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -137,7 +144,18 @@ export default function Calendar() {
             </DialogActions>
           </>
         )}
-      </Dialog>
+      </Dialog> */}
+
+      
+
+      <EventDetails
+        open={!!selectedEvent}
+        event={selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        onDelete={handleDelete}
+        refetch={refetch}
+      />
+
 
 
     </Box>

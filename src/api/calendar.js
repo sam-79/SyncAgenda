@@ -48,6 +48,15 @@ export const calendarApi = createApi({
                 method: 'DELETE',
             }),
         }),
+        uploadMeetingArtifact: builder.mutation({
+            query: ({ id, file }) => ({
+                url: `/upload_meeting_file/${id}`,
+                method: 'POST',
+                body: file,
+                formData: true
+            }),
+            invalidatesTags: [{ type: 'Meeting' }]
+        })
     }),
 });
 
@@ -55,6 +64,7 @@ export const {
     useGetMeetingsByDateQuery,
     useGetMeetingDetailsQuery,
     useCreateMeetingMutation,
-    useDeleteMeetingMutation
+    useDeleteMeetingMutation,
+    useUploadMeetingArtifactMutation
 } = calendarApi;
 
