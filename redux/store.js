@@ -50,6 +50,7 @@ import authSlice from './features/authSlice';
 import { calendarApi } from '../src/api/calendar';
 import { libraryApi } from '../src/api/library';
 import { meetingAssistantApi } from '../src/api/meetingAssitant';
+import { userApi } from '../src/api/user';
 
 // 1. Configure persistence (only for auth data)
 const persistConfig = {
@@ -63,7 +64,8 @@ const rootReducer = combineReducers({
     auth: authSlice,
     [calendarApi.reducerPath]: calendarApi.reducer,
     [libraryApi.reducerPath]: libraryApi.reducer,
-    [meetingAssistantApi.reducerPath]:meetingAssistantApi.reducer
+    [meetingAssistantApi.reducerPath]:meetingAssistantApi.reducer,
+    [userApi.reducerPath]:userApi.reducer
 });
 
 // 3. Wrap rootReducer with persistence
@@ -75,7 +77,7 @@ export const store = configureStore({
     middleware: getDefaultMiddleware =>
         getDefaultMiddleware({
             serializableCheck: false,
-        }).concat(calendarApi.middleware, libraryApi.middleware, meetingAssistantApi.middleware),
+        }).concat(calendarApi.middleware, libraryApi.middleware, meetingAssistantApi.middleware, userApi.middleware),
 });
 
 // 5. Create and export the persistor

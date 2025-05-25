@@ -23,6 +23,7 @@ import Library from './pages/Library.jsx';
 
 import { ThemeProvider } from './theme/ThemeProvider'; // ✅ no need to import useColorMode here
 import ActionItems from './pages/actionItems.jsx';
+import UserProfile from './pages/UserProfile.jsx';
 
 const router = createBrowserRouter([
   {
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
             path: 'actionitems',
             Component: ActionItems,
           },
+          {
+            path:'userprofile',
+            Component: UserProfile,
+          }
         ],
       },
     ],

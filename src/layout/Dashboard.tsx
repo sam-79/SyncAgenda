@@ -260,7 +260,7 @@ export default function Dashboard() {
       <List>
         <ListItem disablePadding sx={{ display: 'block' }}>
           <ListItemButton
-            onClick={() => navigate('./profile')}
+            onClick={() => navigate('./userprofile')}
             sx={{
               minHeight: 60,
               px: 2,
