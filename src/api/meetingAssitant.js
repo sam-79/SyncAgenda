@@ -27,7 +27,7 @@ export const meetingAssistantApi = createApi({
     // GET /meetings/chathistory/:id
     getChatMeetingHistory: builder.query({
       query: (meetingId) => `/meetings/chathistory/${meetingId}`,
-      providesTags: (result, error, id) => [{ type: 'meetingchat', id }],
+      providesTags: (result, error, id) => [{ type: `meetingchat_${id}`, id }],
     }),
   }),
 });

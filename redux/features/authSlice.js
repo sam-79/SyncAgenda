@@ -2,12 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { signin, signup } from '../../src/api/auth';
 
 const initialState = {
-  userData: null,
-  userVerified: false,
-  isLoading: false,
-  isSuccess: false,
-  isError: false,
-  error: null,
+  userData: null
 };
 
 // confirmSignup
@@ -16,6 +11,9 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    setUserData: (state, action) => {
+      state.userData = action.payload
+    },
     logout: (state) => {
       state.userData = null
       state.userVerified = false
@@ -30,7 +28,7 @@ export const authSlice = createSlice({
       state.isError = false
       state.error = null
     },
-    changeVerifiedStatus:(state, action)=>{
+    changeVerifiedStatus: (state, action) => {
       state.userVerified = action.payload.is_verified;
     }
   },
@@ -45,18 +43,18 @@ export const authSlice = createSlice({
       state.isLoading = false;
       state.isSuccess = true;
       state.userVerified = action.payload.detail.is_verified;
-      
-      if(action.payload.detail.is_verified){
-        state.userData = action.payload.detail;
-      }else{
-        // Alert.alert("Verify OTP", action.payload.detail.msg)
-        
-      }
 
+      // if (action.payload.detail.is_verified) {
+      //   state.userData = action.payload.detail;
+      // } else {
+      //   // Alert.alert("Verify OTP", action.payload.detail.msg)
+
+      // }
+      return action.payload?.detail
     });
     builder.addCase(signin.rejected, (state, action) => {
       //console.log("authSLice, Line 36", action)
-      console.log("authSLice.js signin line 55",state, action)
+      console.log("authSLice.js signin line 55", state, action)
 
       state.isLoading = false;
       state.isError = true;
@@ -76,10 +74,8 @@ export const authSlice = createSlice({
       state.isSuccess = true;
       state.isError = false;
       state.userVerified = action.payload.detail.is_verified;
-      //state.userData = action.payload.userData;
-      //state.userVerified = action.payload.detail.is_verified;
-      // Alert.alert("Success", action.payload.detail.msg)
-
+      // state.userVerified = action.payload.detail.is_verified;
+      return action.payload.detail
     });
     builder.addCase(signup.rejected, (state, action) => {
       console.log("authSLice, Line 71", action)
@@ -90,8 +86,8 @@ export const authSlice = createSlice({
       // Alert.alert("Error", action.payload.detail)
 
     });
-    
+
   },
 });
-export const { logout, resetTempValues, changeVerifiedStatus } = authSlice.actions
+export const { logout, setUserData, resetTempValues, changeVerifiedStatus } = authSlice.actions
 export default authSlice.reducer;

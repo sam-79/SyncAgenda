@@ -56,6 +56,13 @@ export const calendarApi = createApi({
                 formData: true
             }),
             invalidatesTags: [{ type: 'Meeting' }]
+        }),
+        deleteParticipant: builder.mutation({
+            query: (id) => ({
+                url: `/delete_participant/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: [{ type: 'Meeting' }],
         })
     }),
 });
@@ -65,6 +72,7 @@ export const {
     useGetMeetingDetailsQuery,
     useCreateMeetingMutation,
     useDeleteMeetingMutation,
-    useUploadMeetingArtifactMutation
+    useUploadMeetingArtifactMutation,
+    useDeleteParticipantMutation
 } = calendarApi;
 

@@ -6,7 +6,10 @@ import {
   useCreateMeetingMutation,
   useDeleteMeetingMutation
 } from '../api/calendar';
-import { Box, Button, Typography, Paper, List, ListItem, ListItemText, CircularProgress } from '@mui/material';
+import {
+  Box, Button, Typography, Paper, List, ListItem, ListItemText, CircularProgress, Snackbar,
+  Alert
+} from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -26,6 +29,16 @@ export default function Library() {
   const formattedDate = selectedDate.format('YYYY-MM-DD');
 
   // const [openDialog, setOpenDialog] = useState(false);// meeting dialog
+  type AlertSeverity = 'error' | 'info' | 'success' | 'warning' | undefined;
+  const [alertSeverity, setAlertSeverity] = useState<AlertSeverity>(undefined);
+  const [snackbarMsg, setSnackbarMsg] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const snackbarControls = {
+    setAlertSeverity,
+    setSnackbarMsg,
+    setSnackbarOpen,
+  };
 
 
   // Inside the component (before return)
@@ -72,9 +85,15 @@ export default function Library() {
       try {
         await deleteMeeting(params.meetingId).unwrap();
         setSelectedMeetingId(null);
+        setAlertSeverity("success")
+        setSnackbarMsg("Meeting deleted successfully")
+        setSnackbarOpen(true)
         // if (onDeleted) onDeleted(); // callback to refresh list or navigate
       } catch (err) {
         console.error('Delete failed:', err);
+        setAlertSeverity("error")
+        setSnackbarMsg("Meeting deletion failed")
+        setSnackbarOpen(true)
       }
     }
   };
@@ -91,24 +110,12 @@ export default function Library() {
           display="flex"
           flexDirection="column"
           gap={2}>
-          <Paper elevation={3} style={{ padding: 16 }}>
-            {/* <Box display="flex" justifyContent="space-between" alignItems="center"> */}
-            <DatePicker
-              label="Select Date"
-              value={selectedDate}
-              sx={{ width: '100%' }}
-              onChange={(newValue) => {
-                setSelectedDate(newValue);
-                setSelectedMeetingId(null);
-              }}
-            />
-            {/* </Box> */}
-          </Paper>
+          
 
           <Paper elevation={3} style={{ flexGrow: 1, overflowY: 'auto', padding: 16 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center">
 
-              <Typography variant="h6">Meetings on {formattedDate}</Typography>
+              <Typography variant="h6">Meetings </Typography>
               <IconButton
                 // variant="outlined"
                 // startIcon={<RefreshIcon />}
@@ -128,10 +135,10 @@ export default function Library() {
                 )}
                 {meetings.map((meeting) => (
                   <ListItem
-                    button
+                    // button
                     key={meeting.id}
                     onClick={() => {
-                      
+
                       setSelectedMeetingId(meeting.id)
                     }}
                     selected={selectedMeetingId === meeting.id}
@@ -164,20 +171,22 @@ export default function Library() {
         {/* Left Panel End*/}
 
         {/* Right Panel Start*/}
-        <Box flexGrow={1}>
+        <Box flexGrow={1} width={'80%'}>
 
 
           {!selectedMeetingId ? (
             <MeetingPlaceholder />
-          ) : meetingDetails  ? (
+          ) : meetingDetails ? (
 
             <Box flexGrow={1} display="flex"
               flexDirection={isSmallScreen ? 'column' : 'row'}
               padding={1} gap={2}>
-              <Box width={isSmallScreen ? '100%' : '70%'}>
-                <MeetingDetails meetingDetails={meetingDetails} setSelectedMeetingId={setSelectedMeetingId} onDeleteMeeting={handleMeetingDelete} />
+              <Box width={isSmallScreen ? '100%' : '60%'}>
+                <MeetingDetails meetingDetails={meetingDetails} setSelectedMeetingId={setSelectedMeetingId} onDeleteMeeting={handleMeetingDelete} {...snackbarControls} />
               </Box>
-              <MeetingChatBot meetingID={selectedMeetingId} />
+              <Box width={isSmallScreen ? '100%' : '40%'}>
+                <MeetingChatBot meetingID={selectedMeetingId} {...snackbarControls} />
+              </Box>
             </Box>
           ) : (
             // <Typography>Loading meeting details...</Typography>
@@ -189,6 +198,17 @@ export default function Library() {
 
 
       </Box>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert severity={alertSeverity} sx={{ width: '100%' }}>
+          {snackbarMsg}
+        </Alert>
+      </Snackbar>
     </LocalizationProvider>
   );
 }

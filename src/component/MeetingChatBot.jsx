@@ -8,7 +8,7 @@ import {
   TextField,
   Button,
   CircularProgress,
-  Alert
+  Alert,
 } from '@mui/material';
 import { useState, useRef, useEffect } from 'react';
 import {
@@ -22,34 +22,45 @@ export default function MeetingChatBot({ meetingID }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
+  
 
   const [askQuestion, { isLoading }] = useAskMeetingQuestionMutation();
 
   const {
     data: history,
     isLoading: isChatHistoryLoading,
+    isSuccess: isChatHistorySuccess,
     isError,
     error,
     refetch
-  } = useGetChatMeetingHistoryQuery (meetingID, {
-    skip: !meetingID, // skip if no ID
+  } = useGetChatMeetingHistoryQuery(meetingID, {
+    skip: !meetingID,
+    refetchOnMountOrArgChange: true,
   });
+
 
   // Load chat history when meetingID changes
   useEffect(() => {
-    if (history?.length) {
+    console.log({ meetingID, history, isChatHistoryLoading, isError, error })
+    if (history?.length > 0 && !isError && !isChatHistoryLoading) {
       const formattedHistory = history.map((entry) => [entry]).flat();
-
       setMessages(formattedHistory);
-    } else if (!isChatHistoryLoading && !isError) {
+    } else if (isError && error.data?.detail) {
       setMessages([
         {
           sender_type: 'bot',
           message: '👋 Hi! I’m your meeting assistant. Ask me anything about your meetings.'
         }
-      ]);
+      ])
+    } else {
+      setMessages([{
+        sender_type: 'bot',
+        message: '👋 Hi! I’m your meeting assistant. Ask me anything about your meetings.'
+      }]);
     }
-  }, [meetingID, history]);
+  }, [error, history]);
+
+
 
   const handleSend = async () => {
     const trimmed = input.trim();
@@ -80,9 +91,9 @@ export default function MeetingChatBot({ meetingID }) {
     }
   };
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  // useEffect(() => {
+  //   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // }, [messages]);
 
   return (
     <Paper
@@ -101,13 +112,9 @@ export default function MeetingChatBot({ meetingID }) {
       <Divider sx={{ mb: 2 }} />
 
       {
-        isChatHistoryLoading && <CircularProgress />
-      }
-
-      {
         isError && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {`${error.status}: ${error.data.detail}` }
+            {`${error.status}: ${error.data.detail}`}
           </Alert>
         )
       }
@@ -126,77 +133,78 @@ export default function MeetingChatBot({ meetingID }) {
           }
         }}
       >
-        {messages.map((msg, idx) => (
-          <Box
-            key={idx}
-            display="flex"
-            justifyContent={msg.sender_type === 'user' ? 'flex-end' : 'flex-start'}
-            mb={1.5}
-          >
+        {isChatHistoryLoading ? <CircularProgress /> :
+          messages.map((msg, idx) => (
             <Box
-              px={2}
-              py={1.5}
-              maxWidth="75%"
-              borderRadius={2}
-              bgcolor={msg.sender_type === 'user' ? 'primary.main' : 'background.default'}
-              color={msg.sender_type === 'user' ? 'primary.contrastText' : 'text.primary'}
-              boxShadow={1}
-              fontSize="0.95rem"
+              key={idx}
+              display="flex"
+              justifyContent={msg.sender_type === 'user' ? 'flex-end' : 'flex-start'}
+              mb={1.5}
             >
-              <ReactMarkdown
-                children={msg.message}
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  p: ({ children }) => <Typography component="span">{children}</Typography>,
-                  code: ({ inline, children }) =>
-                    inline ? (
-                      <Box
-                        component="code"
-                        sx={{
-                          bgcolor: 'grey.300',
-                          px: 0.6,
-                          borderRadius: 1,
-                          fontSize: '0.85em',
-                          fontFamily: 'monospace'
-                        }}
-                      >
-                        {children}
-                      </Box>
-                    ) : (
-                      <Box
-                        component="pre"
-                        sx={{
-                          bgcolor: 'background.default',
-                          color: 'text.primary',
-                          p: 2,
-                          borderRadius: 2,
-                          fontSize: '0.85em',
-                          overflowX: 'auto'
-                        }}
-                      >
-                        <code>{children}</code>
-                      </Box>
-                    ),
-                  li: ({ children }) => (
-                    <li>
-                      <Typography component="span" variant="body2">
-                        {children}
-                      </Typography>
-                    </li>
-                  )
-                }}
-              />
-              <Typography
-                variant="caption"
-                sx={{ display: 'block', textAlign: 'right', mt: 0.5, opacity: 0.7, fontSize: '0.7rem' }}
+              <Box
+                px={2}
+                py={1.5}
+                maxWidth="75%"
+                borderRadius={2}
+                bgcolor={msg.sender_type === 'user' ? 'primary.main' : 'background.default'}
+                color={msg.sender_type === 'user' ? 'primary.contrastText' : 'text.primary'}
+                boxShadow={1}
+                fontSize="0.95rem"
               >
-                {msg.timestamp
-                  ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                  : ''}
-              </Typography>
+                <ReactMarkdown
+                  children={msg.message}
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => <Typography component="span">{children}</Typography>,
+                    code: ({ inline, children }) =>
+                      inline ? (
+                        <Box
+                          component="code"
+                          sx={{
+                            bgcolor: 'grey.300',
+                            px: 0.6,
+                            borderRadius: 1,
+                            fontSize: '0.85em',
+                            fontFamily: 'monospace'
+                          }}
+                        >
+                          {children}
+                        </Box>
+                      ) : (
+                        <Box
+                          component="pre"
+                          sx={{
+                            bgcolor: 'background.default',
+                            color: 'text.primary',
+                            p: 2,
+                            borderRadius: 2,
+                            fontSize: '0.85em',
+                            overflowX: 'auto'
+                          }}
+                        >
+                          <code>{children}</code>
+                        </Box>
+                      ),
+                    li: ({ children }) => (
+                      <li>
+                        <Typography component="span" variant="body2">
+                          {children}
+                        </Typography>
+                      </li>
+                    )
+                  }}
+                />
+                <Typography
+                  variant="caption"
+                  sx={{ display: 'block', textAlign: 'right', mt: 0.5, opacity: 0.7, fontSize: '0.7rem' }}
+                >
+                  {msg.timestamp
+                    ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : ''}
+                </Typography>
+              </Box>
             </Box>
-          </Box>
-        ))}
+          ))}
         <div ref={messagesEndRef} />
       </Box>
 

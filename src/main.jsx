@@ -18,8 +18,8 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '../redux/store.js';
 
 import Home from './pages/Home.jsx';
-import Calendar from './pages/Calendar.js';
-import Library from './pages/Library.jsx';
+import Calendar from './pages/Calendar.tsx';
+import Library from './pages/Library.tsx';
 
 import { ThemeProvider } from './theme/ThemeProvider'; // ✅ no need to import useColorMode here
 import ActionItems from './pages/actionItems.jsx';
@@ -37,6 +37,7 @@ const router = createBrowserRouter([
       {
         path: 'user-auth',
         Component: UserAuthPage,
+        
       },
       {
         path: 'dashboard',

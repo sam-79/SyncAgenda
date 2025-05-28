@@ -9,12 +9,16 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton
+  IconButton,
+  Snackbar,
+  Alert,
+  AlertPropsColorOverrides,
+  AlertColor
 } from '@mui/material';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { useGetMeetingsByDateQuery, useDeleteMeetingMutation } from '../api/calendar';
+import { useGetMeetingsByDateQuery, useDeleteMeetingMutation, useCreateMeetingMutation } from '../api/calendar';
 import CreateMeetingDialog from '../component/CreateMeetingDialog';
 import { useSelector } from 'react-redux';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -33,15 +37,30 @@ export default function Calendar() {
 
   const onView = useCallback((newView) => setView(newView), [setView])
 
+  const [alertSeverity, setAlertSeverity] = useState<AlertColor | AlertPropsColorOverrides | undefined>(undefined);
+  const [snackbarMsg, setSnackbarMsg] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const snackbarControls = {
+    setAlertSeverity,
+    setSnackbarMsg,
+    setSnackbarOpen,
+  };
+
+
   const {
     data: meetings = [],
-    isLoading,
-    isError,
+    isLoading: isGetMeetingByDateLoading,
+    isError: isGetMeetingByDateError,
     refetch
   } = useGetMeetingsByDateQuery(moment().format('YYYY-MM-DD'));
-  
+
+  const [deleteMeeting] = useDeleteMeetingMutation();
+
+  const [createMeeting] = useCreateMeetingMutation(); //function use to reate meetings
 
   useEffect(() => {
+    // executes just after fetching all meeting details
     if (meetings?.length > 0) {
       const mapped = meetings.map((meeting) => ({
         id: meeting.id,
@@ -56,31 +75,77 @@ export default function Calendar() {
     }
   }, [meetings]);
 
+  useEffect(() => {
+
+    if (isGetMeetingByDateError) {
+      setAlertSeverity('error')
+      setSnackbarMsg('Failed to fetch events')
+      setSnackbarOpen(true)
+    }
+  }, [isGetMeetingByDateLoading, isGetMeetingByDateError])
 
 
 
-  const handleDelete = () => {
-    // Placeholder: Add actual delete logic here
+  const handleCreateMeeting = async (meetingData) => {
+    try {
+      console.log(meetingData)
+      const payload = await createMeeting(meetingData).unwrap()
+      refetch()
+      setSnackbarMsg(payload.message)
+      setAlertSeverity('success')
+      setOpenDialog(false)
+    } catch (error) {
+      setSnackbarMsg("Fail to create meeting")
+      setAlertSeverity("error")
+    } finally {
+      setSnackbarOpen(true);
+
+    }
+  }
+
+
+  const handleDelete = async () => {
+    // Placeholder: Add actual delete meeting logic here
     alert(`Delete meeting with ID: ${selectedEvent.id}`);
-    setSelectedEvent(null);
+    try {
+      const payload = await deleteMeeting(selectedEvent.id).unwrap();
+      refetch()
+      console.log("payload", payload)
+      setSnackbarMsg(payload.detail)
+      setSelectedEvent(null);
+    } catch (error) {
+      setSnackbarMsg(error?.data.detail)
+    } finally {
+      setSnackbarOpen(true);
+    }
+
   };
+
+
 
   return (
     <Box sx={{ p: 2, height: '100vh' }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        {/* Left side: Title */}
         <Typography variant="h5">Calendar</Typography>
-        <Button variant="contained" onClick={() => setOpenDialog(true)}>
-          Create Meeting
-        </Button>
+
+        {/* Right side: Buttons */}
+        <Box display="flex" gap={2}>
+          <Button variant="contained" onClick={refetch}>
+            {isGetMeetingByDateLoading ? <CircularProgress color="primary.contrastText" size={20} /> : "Refresh"}
+          </Button>
+          <Button variant="contained" onClick={() => setOpenDialog(true)}>
+            {isGetMeetingByDateLoading ? <CircularProgress color="primary.contrastText" size={20} /> : "Create Meeting"}
+          </Button>
+        </Box>
       </Box>
 
+
       <Paper elevation={3} sx={{ height: 'calc(100% - 64px)', p: 2 }}>
-        {isLoading ? (
+        {isGetMeetingByDateLoading ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%">
             <CircularProgress />
           </Box>
-        ) : isError ? (
-          <Typography color="error">Failed to load events.</Typography>
         ) : (
           <BigCalendar
             localizer={localizer}
@@ -103,10 +168,9 @@ export default function Calendar() {
         <CreateMeetingDialog
           open={openDialog}
           onClose={() => setOpenDialog(false)}
-          onSubmit={() => {
-            setOpenDialog(false);
-            refetch();
-          }}
+          onSubmit={handleCreateMeeting}
+
+
         />
       </Dialog>
 
@@ -146,7 +210,7 @@ export default function Calendar() {
         )}
       </Dialog> */}
 
-      
+
 
       <EventDetails
         open={!!selectedEvent}
@@ -154,7 +218,30 @@ export default function Calendar() {
         onClose={() => setSelectedEvent(null)}
         onDelete={handleDelete}
         refetch={refetch}
+        {...snackbarControls}
       />
+      {/* NOTIFICATION */}
+      {/* <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMsg}
+      >
+        <Alert severity={alertSeverity} sx={{ width: '100%' }}>
+          {snackbarMsg}
+        </Alert>
+      </Snackbar> */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert severity={alertSeverity} sx={{ width: '100%' }}>
+          {snackbarMsg}
+        </Alert>
+      </Snackbar>
 
 
 

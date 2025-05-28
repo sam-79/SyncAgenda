@@ -33,7 +33,8 @@ export default function MinutesOfMeeting({ data }) {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
+    // <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
+    <Box>
       {/* Summary */}
       <Typography variant="h6" gutterBottom>
         📝 Summary
@@ -58,9 +59,11 @@ export default function MinutesOfMeeting({ data }) {
       <Typography variant="h6" gutterBottom>
         ✅ Action Items
       </Typography>
-      <List dense>
-        {renderMarkdownList(mom.action_items || '')}
-      </List>
+      <Typography variant="body1" component="div" gutterBottom>
+        <List dense>
+          {mom.action_items ? renderMarkdownList(mom.action_items) : <Markdown>{'No action items avilable'}</Markdown>}
+        </List>
+      </Typography>
 
       <Divider sx={{ my: 2 }} />
 
@@ -71,6 +74,6 @@ export default function MinutesOfMeeting({ data }) {
       <Typography variant="body1" component="div">
         <Markdown>{mom.additional_notes || 'No additional notes available.'}</Markdown>
       </Typography>
-    </Paper>
+    </Box>
   );
 }

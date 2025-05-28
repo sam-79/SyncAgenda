@@ -22,7 +22,7 @@ export const signin = createAsyncThunk('auth/signin', async (params, thunkApi) =
     };
 
     try {
-        console.log("header",requestOptions)
+        console.log("header", requestOptions)
         const response = await fetch(`${import.meta.env.VITE_BACKEND_SERVER_HOST_URL}/auth/token`, requestOptions);
         let jsonData = await response.json();
         console.log("sign in auth.js", response)
@@ -30,10 +30,12 @@ export const signin = createAsyncThunk('auth/signin', async (params, thunkApi) =
         if (response.status == 200) {
             //console.log("loginfunction", jsonData)
             return thunkApi.fulfillWithValue(jsonData);
-        } else if (response.status == 403) {
-            //console.log("loginfunction else", jsonData)
-            return thunkApi.fulfillWithValue(jsonData)
-        } else {
+        }
+        // else if (response.status == 403) {
+        //     //console.log("loginfunction else", jsonData)
+        //     return thunkApi.fulfillWithValue(jsonData)
+        // }
+        else {
             return thunkApi.rejectWithValue(jsonData)
         }
     } catch (error) {
@@ -64,11 +66,11 @@ export const signup = createAsyncThunk('signup', async (params, thunkApi) => {
     };
 
     try {
-        const response = await fetch(`${params.hostname}/api/users`, requestOptions);
-        jsonData = await response.json();
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_SERVER_HOST_URL}/auth/register`, requestOptions);
+        let jsonData = await response.json();
         console.log("signupfunction", jsonData)
         // jsonData = {}
-        if (response.status == 200) { 
+        if (response.status == 200) {
             return thunkApi.fulfillWithValue(jsonData)
         } else {
             //console.log("signupfunction else", jsonData)
@@ -98,7 +100,7 @@ export const SendOTP = (params) => {
             headers: myHeaders,
         };
         try {
-            const response = await fetch(`${params.hostname}/api/users/generate_otp`, requestOptions);
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_SERVER_HOST_URL}/auth/users/generate_otp`, requestOptions);
             const jsonData = await response.json();
             console.log("Send OTP respponse ", jsonData)
 
@@ -138,7 +140,7 @@ export const VerifyOTP = (params) => {
         };
 
         try {
-            const response = await fetch(`${params.hostname}/api/users/verify_otp`, requestOptions);
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_SERVER_HOST_URL}/auth/users/verify_otp`, requestOptions);
             const jsonData = await response.json();
 
             console.log("products detaisl get by id ", jsonData)
@@ -208,7 +210,7 @@ export const GetUserProfile = (params) => {
         };
 
         try {
-            const response = await fetch(`${params.hostname}/api/users/profile`, requestOptions);
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_SERVER_HOST_URL}/auth/users/me`, requestOptions);
             const jsonData = await response.json();
 
             console.log("get user profile ", jsonData)
@@ -245,7 +247,7 @@ export const UpdateUserProfile = (params) => {
         };
 
         try {
-            const response = await fetch(`${params.hostname}/api/users/profile_update`, requestOptions);
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_SERVER_HOST_URL}/api/users/profile_update`, requestOptions);
             const jsonData = await response.json();
 
             console.log("get user profile ", jsonData)
@@ -282,7 +284,7 @@ export const UpdateUserProfile = (params) => {
 //         };
 
 //     try {
-//         const response = await fetch(`${params.hostname}/api/users/sync_grants`, requestOptions);
+//         const response = await fetch(`${import.meta.env.VITE_BACKEND_SERVER_HOST_URL}/api/users/sync_grants`, requestOptions);
 //         const jsonData = await response.json();
 //         console.log("syncGrants naylas.js", response)
 

@@ -41,12 +41,43 @@ export const libraryApi = createApi({
         formData.append("file", file);
 
         return {
-          url: `/upload_meeti ng_file/${meetingId}`,
+          url: `/upload_meeting_file/${meetingId}`,
           method: 'POST',
           body: formData,
         };
       },
     }),
+    getMeetingSentiment: builder.query({
+      query: (meetingId) => `/meetings/get_sentiment/${meetingId}`,
+      providesTags: (result, error, id) => [{ type: 'Library', id }],
+    }),
+    resetAIResponse: builder.mutation({
+      query: (meetingId) => ({
+        url: `/meeting/reset_ai_response/${meetingId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Library' }],
+    }),
+
+    getMeetingMedia: builder.query({
+      query: (meetingId) => ({
+        url: `/meetings/media_stream/${meetingId}`,
+        method: 'GET',
+        responseHandler: async (response) => {
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Media not found');
+          }
+          const blob = await response.blob();
+          const type = blob.type;
+          const url = URL.createObjectURL(blob);
+          return { url, type };
+        },
+        // this disables default JSON parsing
+        fetchFn: fetch
+      }),
+    }),
+
   }),
 });
 
@@ -55,4 +86,7 @@ export const {
   useGetMeetingTranscriptQuery,
   useGetMeetingMinutesMutation,
   useUploadMeetingFileMutation,
+  useGetMeetingSentimentQuery,
+  useResetAIResponseMutation,
+  useGetMeetingMediaQuery,
 } = libraryApi;

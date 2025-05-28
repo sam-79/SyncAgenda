@@ -32,11 +32,13 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { Logout, Person } from '@mui/icons-material';
 
 
-import { Outlet, useLocation, useNavigate } from 'react-router';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useColorMode } from '../theme/ColorModeContext';
 import { logout } from '../../redux/features/authSlice';
+
+
 
 const drawerWidth = 240;
 
@@ -73,7 +75,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  padding: theme.spacing(0, 2),
+  flexDirection:'column',
   ...theme.mixins.toolbar
 }));
 
@@ -138,7 +140,13 @@ export default function Dashboard() {
   // };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{
+      display: 'flex',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover', // or 'contain', or 'auto'
+      backgroundPosition: 'center',
+      
+    }}>
       <CssBaseline />
 
       {/* App Bar */}
@@ -148,7 +156,7 @@ export default function Dashboard() {
             <IconButton color="inherit" onClick={() => setOpen((prev) => !prev)} edge="start">
               {open ? <ChevronLeftIcon /> : <MenuIcon />}
             </IconButton>
-            <Typography variant="h6" noWrap sx={{ ml: 2 }}>
+            <Typography variant="h6" noWrap sx={{ ml: 2 }} onclick={()=>navigate('/')}>
               SyncAgenda
             </Typography>
           </Box>
@@ -172,11 +180,11 @@ export default function Dashboard() {
         {/* \Drawer Header */}
         <DrawerHeader>
           {open && (
-            <Box display="flex" flexDirection="column" alignItems="center" gap={1} my={1}>
+            <Box display="flex" flexDirection="column" justifyContent={'center'} alignItems="center" gap={1} my={1}>
               <Avatar
                 src="https://a0.anyrgb.com/pngimg/1772/1960/material-design-icon-user-profile-avatar-ico-flat-facebook-icon-design-conversation-forehead.png"
                 alt={userData.name}
-                sx={{ width: 64, height: 64 }}
+                sx={{ width: 64, height: 'auto' }}
               />
               <Typography variant="subtitle1" fontWeight={600}>
                 {userData.name}
@@ -187,7 +195,7 @@ export default function Dashboard() {
             </Box>
           )}
         </DrawerHeader>
-        
+
         <Divider />
         {/* drawer list items */}
         <List>
@@ -255,74 +263,74 @@ export default function Dashboard() {
         <Divider />
 
         {/* Bottom section with Profile and Logout */}
-    <Box mt="auto">
-      <Divider />
-      <List>
-        <ListItem disablePadding sx={{ display: 'block' }}>
-          <ListItemButton
-            onClick={() => navigate('./userprofile')}
-            sx={{
-              minHeight: 60,
-              px: 2,
-              py: 1.5,
-              margin: 1,
-              flexDirection: open ? 'row' : 'column',
-              alignItems: 'center',
-              justifyContent: open ? 'flex-start' : 'center',
-              borderRadius: 2,
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 0, justifyContent: 'center', mb: open ? 0 : 0.5 }}>
-              <Person />
-            </ListItemIcon>
-            {open ? <ListItemText primary="Profile" sx={{ ml: 2 }} /> : <Typography variant="caption">Profile</Typography>}
-          </ListItemButton>
-        </ListItem>
+        <Box mt="auto">
+          <Divider />
+          <List>
+            <ListItem disablePadding sx={{ display: 'block' }}>
+              <ListItemButton
+                onClick={() => navigate('./userprofile')}
+                sx={{
+                  minHeight: 60,
+                  px: 2,
+                  py: 1.5,
+                  margin: 1,
+                  flexDirection: open ? 'row' : 'column',
+                  alignItems: 'center',
+                  justifyContent: open ? 'flex-start' : 'center',
+                  borderRadius: 2,
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 0, justifyContent: 'center', mb: open ? 0 : 0.5 }}>
+                  <Person />
+                </ListItemIcon>
+                {open ? <ListItemText primary="Profile" sx={{ ml: 2 }} /> : <Typography variant="caption">Profile</Typography>}
+              </ListItemButton>
+            </ListItem>
 
-        <ListItem disablePadding sx={{ display: 'block' }}>
-          <ListItemButton
-            onClick={() => {
-              if (window.confirm("Are you sure to logout?")){
-                dispath(logout());
-              }
-            }}
-            sx={{
-              minHeight: 60,
-              px: 2,
-              py: 1.5,
-              margin: 1,
-              flexDirection: open ? 'row' : 'column',
-              alignItems: 'center',
-              justifyContent: open ? 'flex-start' : 'center',
-              borderRadius: 2,
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 0, justifyContent: 'center', mb: open ? 0 : 0.5 }}>
-              <Logout />
-            </ListItemIcon>
-            {open ? <ListItemText primary="Logout" sx={{ ml: 2 }} /> : <Typography variant="caption">Logout</Typography>}
-          </ListItemButton>
-        </ListItem>
-      </List>
-    </Box>
+            <ListItem disablePadding sx={{ display: 'block' }}>
+              <ListItemButton
+                onClick={() => {
+                  if (window.confirm("Are you sure to logout?")) {
+                    dispath(logout());
+                  }
+                }}
+                sx={{
+                  minHeight: 60,
+                  px: 2,
+                  py: 1.5,
+                  margin: 1,
+                  flexDirection: open ? 'row' : 'column',
+                  alignItems: 'center',
+                  justifyContent: open ? 'flex-start' : 'center',
+                  borderRadius: 2,
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 0, justifyContent: 'center', mb: open ? 0 : 0.5 }}>
+                  <Logout />
+                </ListItemIcon>
+                {open ? <ListItemText primary="Logout" sx={{ ml: 2 }} /> : <Typography variant="caption">Logout</Typography>}
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Box>
 
       </Drawer>
 
       {/* Main content */}
       <Box component="main" sx={{
 
-          flexGrow: 1,
-          transition: theme.transitions.create(['margin', 'width'], {
+        flexGrow: 1,
+        transition: theme.transitions.create(['margin', 'width'], {
 
-            easing: theme.transitions.easing.sharp,
+          easing: theme.transitions.easing.sharp,
 
-            duration: theme.transitions.duration.enteringScreen
+          duration: theme.transitions.duration.enteringScreen
 
-          }),
+        }),
 
-          // ml: `${open ? drawerWidth : `calc(${theme.spacing(9)} + 1px)`} `,
+        // ml: `${open ? drawerWidth : `calc(${theme.spacing(9)} + 1px)`} `,
 
-        }}>
+      }}>
         <DrawerHeader />
         <Outlet />
       </Box>

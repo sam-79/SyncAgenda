@@ -7,7 +7,8 @@ import {
     Tab,
     Divider,
     CircularProgress,
-    Link
+    Link,
+    Button
 } from '@mui/material';
 import dayjs from 'dayjs';
 
@@ -15,40 +16,42 @@ import {
     useGetMeetingSummaryQuery,
     useGetMeetingMinutesMutation,
     useGetMeetingTranscriptQuery,
+    useResetAIResponseMutation
 } from '../api/library'; // Adjust path if needed
 
 import MinutesOfMeeting from './MinutesOfMeeting';
+import SentimentAnalysis from './SentimentAnalysis';
+import MediaPlayer from './MediaPlayer';
 
-export default function MeetingDetails({ meetingDetails, setSelectedMeetingId, onDeleteMeeting }) {
+export default function MeetingDetails({ meetingDetails, setSelectedMeetingId, onDeleteMeeting, setAlertSeverity, setSnackbarMsg, setSnackbarOpen }) {
     const [activeTab, setActiveTab] = useState(0);
     const meetingId = meetingDetails.id;
     const [minutesData, setMinutesData] = useState(null);
-    const [isLoading, setLoading] = useState(false);
 
-    const TABS = ['Transcript', 'Summary', 'MoM', 'Stats'];
+    const TABS = ['Transcript', 'Summary', 'MoM', 'Sentiment Analysis'];
 
-    useEffect(() => {
-        if (!meetingDetails) return;
+    // useEffect(() => {
+    //     if (!meetingDetails) return;
 
-        const fetchTabData = async () => {
-            setLoading(true);
-            try {
-                const tabName = TABS[activeTab].toLowerCase().replace(/ /g, '_'); // 'minutes_of_meeting'
-                const res = await fetch(`/api/meeting/${meetingDetails.id}/${tabName}`);
-                const data = await res.json();
-                setTabData(data);
-            } catch (err) {
-                console.error('Failed to fetch tab content:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    //     const fetchTabData = async () => {
+    //         setLoading(true);
+    //         try {
+    //             const tabName = TABS[activeTab].toLowerCase().replace(/ /g, '_'); // 'minutes_of_meeting'
+    //             const res = await fetch(`/api/meeting/${meetingDetails.id}/${tabName}`);
+    //             const data = await res.json();
+    //             setTabData(data);
+    //         } catch (err) {
+    //             console.error('Failed to fetch tab content:', err);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
 
-        fetchTabData();
-    }, [activeTab, meetingDetails]);
+    //     fetchTabData();
+    // }, [activeTab, meetingDetails]);
 
 
-    //new code
+
     const {
         data: summaryData,
         isLoading: isSummaryLoading,
@@ -65,6 +68,23 @@ export default function MeetingDetails({ meetingDetails, setSelectedMeetingId, o
 
     const [getMeetingMinutes, { data: minutesResponse, isLoading: isMinutesLoading }] =
         useGetMeetingMinutesMutation();
+
+    const [resetAIResponse, { isLoading: isResetLoading }] = useResetAIResponseMutation();
+
+    const handleReset = async () => {
+        try {
+            const res = await resetAIResponse(meetingId).unwrap();
+            setAlertSeverity("success")
+            setSnackbarMsg(res.message)
+            setSnackbarOpen(true)
+            console.log(res.message); // "AI-generated content reset. You can now regenerate ai response."
+        } catch (err) {
+            console.error('Reset failed:', err);
+            setAlertSeverity("error")
+            setSnackbarMsg("Failed to reset AI response")
+            setSnackbarOpen(true)
+        }
+    };
 
     useEffect(() => {
         if (activeTab === 2) {
@@ -88,13 +108,29 @@ export default function MeetingDetails({ meetingDetails, setSelectedMeetingId, o
 
             {/* Date & Time */}
             <Paper elevation={2} sx={{ padding: 2, marginBottom: 2, borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
-                <Typography variant="body1" color='text'>
-                    {dayjs(meetingDetails.meeting_date).format('MMM D YYYY')} &nbsp;•&nbsp; {dayjs(meetingDetails.meeting_date).format('h:mm A')}
 
-                </Typography>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                    <Typography variant="body1" color='text'>
+                        {dayjs(meetingDetails.meeting_date).format('MMM D YYYY')} &nbsp;•&nbsp; {dayjs(meetingDetails.meeting_date).format('h:mm A')}
+                    </Typography>
+
+                    <Button variant="contained" color="error" loading={isResetLoading} onClick={handleReset}>
+                        {"Reset Data"}
+                    </Button>
+
+
+                </Box>
+
                 <Typography variant="body2" mt={1}>
                     {meetingDetails.meeting_description}
                 </Typography>
+
+
+                {/* MEDIASTREAMING COMPONENT HERE */}
+                <MediaPlayer meetingId={meetingDetails.id} />
+
+
+
                 {/* </Paper> */}
 
                 {/* Tabs */}
@@ -190,7 +226,7 @@ export default function MeetingDetails({ meetingDetails, setSelectedMeetingId, o
                         )}
 
                         {activeTab === 3 && (
-                            <Typography variant="body2">Stats coming soon...</Typography>
+                            <SentimentAnalysis meetingId={meetingId} />
                         )}
                     </Box>
                 </Box>

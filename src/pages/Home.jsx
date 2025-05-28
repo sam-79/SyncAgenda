@@ -4,26 +4,27 @@ import { Link } from 'react-router';
 import Lottie from 'lottie-react';
 import aiAnimation from '../assets/lottie/login.json'; // replace with any other if needed
 
+
 const features = [
   {
     title: 'AI-Powered Summarization',
-    desc: 'Instantly summarize meetings with precision using advanced AI algorithms.'
+    desc: 'Generate concise summaries of meeting discussions using LLM-powered summarization service.'
   },
   {
-    title: 'Full Transcription',
-    desc: 'Accurate, real-time transcription of your meetings with keyword highlighting.'
+    title: 'Automatic Transcription',
+    desc: 'Convert audio or video meetings into accurate text transcripts using ASR (Automatic Speech Recognition) microservice.'
   },
   {
-    title: 'Minutes of Meeting (MoM)',
-    desc: 'Auto-generate professional and actionable MoM for every meeting.'
+    title: 'Automated Minutes of Meeting (MoM)',
+    desc: 'Extract key discussion points and action items automatically from meeting content.'
   },
   {
-    title: 'AI Assistant Chat',
-    desc: 'Interact with an AI chatbot to ask questions about your meetings.'
+    title: 'Semantic Q&A - AI Assistant',
+    desc: 'Ask natural language questions about meeting content and retrieve precise answers instantly using semantic search.'
   },
   {
-    title: 'Smart Calendar View',
-    desc: 'Visualize, create, and track meetings easily in a calendar interface.'
+    title: 'Sentiment Analysis',
+    desc: 'Analyze the tone and sentiment of each speaker throughout the meeting for deeper insight into the conversation dynamics.'
   },
   {
     title: 'Secure Library & Archive',
@@ -35,9 +36,15 @@ export default function Home() {
   const { userData } = useSelector((state) => state.auth);
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
+    <Box sx={{
+      minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary',
+      // backgroundImage: `url(${lightBackground})`,
+      // backgroundRepeat: 'no-repeat',
+      // backgroundSize: 'cover', // or 'contain', or 'auto'
+      // backgroundPosition: 'center',
+    }}>
       {/* Hero Section */}
-      <Box sx={{ py: 8, bgcolor: 'background.paper' }}>
+      <Box sx={{ py: 8, bgcolor: 'background.paper', opacity: 0.8 }}>
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={6}>

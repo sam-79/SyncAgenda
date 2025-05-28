@@ -16,6 +16,9 @@ import Lottie from 'lottie-react';
 // import Logo from '../assets/logo.png';
 import heroAnimation from '../assets/lottie/login.json';
 import ScreenRecorder from '../component/ScreenRecorder';
+import HomeLayers from '../component/HomeLayers';
+import Header from '../component/RoundedHeader';
+import backgroundPattern from '../assets/homebg.svg';
 
 export default function LandingPage() {
   const { userData } = useSelector((state) => state.auth);
@@ -24,23 +27,23 @@ export default function LandingPage() {
   const features = [
     {
       title: 'AI-Powered Summarization',
-      desc: 'Instantly summarize meetings with precision using advanced AI algorithms.'
+      desc: 'Generate concise summaries of meeting discussions using LLM-powered summarization service.'
     },
     {
-      title: 'Full Transcription',
-      desc: 'Accurate, real-time transcription of your meetings with keyword highlighting.'
+      title: 'Automatic Transcription',
+      desc: 'Convert audio or video meetings into accurate text transcripts using ASR (Automatic Speech Recognition) microservice.'
     },
     {
-      title: 'Minutes of Meeting (MoM)',
-      desc: 'Auto-generate professional and actionable MoM for every meeting.'
+      title: 'Automated Minutes of Meeting (MoM)',
+      desc: 'Extract key discussion points and action items automatically from meeting content.'
     },
     {
-      title: 'AI Assistant Chat',
-      desc: 'Interact with an AI chatbot to ask questions about your meetings.'
+      title: 'Semantic Q&A - AI Assistant',
+      desc: 'Ask natural language questions about meeting content and retrieve precise answers instantly using semantic search.'
     },
     {
-      title: 'Smart Calendar View',
-      desc: 'Visualize, create, and track meetings easily in a calendar interface.'
+      title: 'Sentiment Analysis',
+      desc: 'Analyze the tone and sentiment of each speaker throughout the meeting for deeper insight into the conversation dynamics.'
     },
     {
       title: 'Secure Library & Archive',
@@ -49,28 +52,37 @@ export default function LandingPage() {
   ];
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
+    <Box sx={{
+      minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary', backgroundImage: `url(${backgroundPattern})`,
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover', // or 'contain', or 'auto'
+      backgroundPosition: 'center',
+    }}>
+      {/* <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -100 }}>
+        <HomeLayers style={{ width: '100%', height: '100%' }} />
+      </Box> */}
       {/* Header */}
-      <Box sx={{ py: 3, px: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box display="flex" alignItems="center" gap={2}>
+      <Header />
+      {/* <Box sx={{ p: 2, position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 1000 }}>
+        <Box display="flex" alignItems="center" gap={2} component={Link} to="/" >
           <Avatar src={'syncagenda.png'} alt="App Logo" sx={{ width: 250 }} />
-          {/* <Typography variant="h5" fontWeight={600}>
+        </Box>
+      </Box> */}
+      {/* <Typography variant="h5" fontWeight={600}>
             SyncAgenda
           </Typography> */}
-        </Box>
-        <Button
+      {/* <Button
           variant="contained"
           component={Link}
           to={userData ? '/dashboard' : '/user-auth'}
           size="large"
         >
           {userData ? 'Go to Dashboard' : 'Get Started'}
-        </Button>
-      </Box>
+        </Button> */}
 
       {/* Hero Section */}
-      <Container maxWidth="lg" sx={{ mt: 6 }}>
-        <Grid container spacing={4} alignItems="center">
+      <Container maxWidth="lg" >
+        <Grid container spacing={4} alignItems="center" sx={{ pt: 10 }}>
           <Grid item xs={12} md={6}>
             <Typography variant="h3" fontWeight={700} gutterBottom>
               Empower Your Meetings with AI
@@ -87,8 +99,9 @@ export default function LandingPage() {
               {userData ? 'Open Dashboard' : 'Try it Free'}
             </Button>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Lottie animationData={heroAnimation} loop style={{ height: 320 }} />
+          <Grid item xs={12} md={6} height={320}>
+            {/* <Lottie animationData={heroAnimation} loop style={{ height: 320 }} /> */}
+            
           </Grid>
         </Grid>
       </Container>
@@ -100,13 +113,13 @@ export default function LandingPage() {
         </Typography>
         <Grid container spacing={8} mt={2} rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
           {features.map((feature, idx) => (
-            <Grid item size={6}  key={idx}>
+            <Grid item size={6} key={idx}>
               <Paper elevation={4}
                 sx={{
                   p: 3,
                   borderRadius: 3,
                   width: '100%',
-                  height:'100%',
+                  height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
@@ -130,7 +143,7 @@ export default function LandingPage() {
             </Grid>
           ))}
         </Grid>
-<ScreenRecorder/>
+        {/* <ScreenRecorder/> */}
 
       </Container>
 
